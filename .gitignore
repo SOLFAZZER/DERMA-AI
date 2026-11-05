@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# Entorno y secretos
+.env
+kaggle.json
+
+# Datos y modelos pesados (se guardan en Drive, no en Git)
+data/*
+!data/.gitkeep
+models/*
+!models/.gitkeep
+*.keras
+*.h5
+
+# Bases de datos locales
+*.db
+*.sqlite
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Editor / sistema
+.vscode/
+.idea/
+.DS_Store
