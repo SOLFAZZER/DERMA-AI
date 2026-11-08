@@ -1,0 +1,70 @@
+{
+  "fecha": "2026-11-06",
+  "conjunto": "HAM10000, partición de prueba agrupada por lesion_id",
+  "n_prueba": 1441,
+  "exactitud": 0.7994448299791811,
+  "precision_macro": 0.6501061811164114,
+  "sensibilidad_macro": 0.6864218046756623,
+  "f1_macro": 0.6618779032324886,
+  "precision_ponderada": 0.821267866679816,
+  "sensibilidad_ponderada": 0.7994448299791811,
+  "f1_ponderada": 0.807658961915843,
+  "por_clase": {
+    "AKIEC": {
+      "precision": 0.35714285714285715,
+      "recall": 0.4411764705882353,
+      "f1-score": 0.39473684210526316,
+      "support": 34.0
+    },
+    "BCC": {
+      "precision": 0.7738095238095238,
+      "recall": 0.7303370786516854,
+      "f1-score": 0.7514450867052023,
+      "support": 89.0
+    },
+    "BKL": {
+      "precision": 0.6811594202898551,
+      "recall": 0.5595238095238095,
+      "f1-score": 0.6143790849673203,
+      "support": 168.0
+    },
+    "DF": {
+      "precision": 0.46153846153846156,
+      "recall": 0.6666666666666666,
+      "f1-score": 0.5454545454545454,
+      "support": 9.0
+    },
+    "MEL": {
+      "precision": 0.3942307692307692,
+      "recall": 0.5616438356164384,
+      "f1-score": 0.4632768361581921,
+      "support": 146.0
+    },
+    "NV": {
+      "precision": 0.93048128342246,
+      "recall": 0.893223819301848,
+      "f1-score": 0.9114719748559456,
+      "support": 974.0
+    },
+    "VASC": {
+      "precision": 0.9523809523809523,
+      "recall": 0.9523809523809523,
+      "f1-score": 0.9523809523809523,
+      "support": 21.0
+    }
+  },
+  "hiperparametros": {
+    "fase1": {
+      "epocas_max": 10,
+      "lr": 0.001
+    },
+    "fase2": {
+      "epocas_max": 30,
+      "lr": 0.0001,
+      "capas_descongeladas": 100
+    },
+    "potencia_pesos": 0.75,
+    "batch": 32,
+    "semilla": 42
+  }
+}
