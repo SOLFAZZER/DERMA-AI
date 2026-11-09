@@ -13,6 +13,8 @@ from app.auth.rutas import router as router_auth
 from app.config import settings
 from app.db import catalogo
 from app.deps import get_conn
+from app.imagenes.limite import LimiteCuerpo
+from app.imagenes.rutas import router as router_imagenes
 
 Conexion = Annotated[sqlite3.Connection, Depends(get_conn)]
 
@@ -46,12 +48,15 @@ app = FastAPI(
     lifespan=lifespan,
 )
 app.include_router(router_auth)
+app.include_router(router_imagenes)
+# 5 MB de imagen + un margen para los encabezados del formulario multipart
+app.add_middleware(LimiteCuerpo, ruta="/api/analizar", max_bytes=settings.max_upload_mb * 1024 * 1024 + 64 * 1024)
 
 
 @app.exception_handler(RequestValidationError)
 async def datos_no_validos(request: Request, exc: RequestValidationError):
-    """En las rutas de autenticación, los datos mal formados responden 400 (como define la API)."""
-    if request.url.path.startswith("/api/auth"):
+    """En autenticación y análisis, los datos mal formados responden 400 (como define la API)."""
+    if request.url.path.startswith(("/api/auth", "/api/analizar")):
         return JSONResponse(status_code=400, content={"detail": "Los datos enviados no son válidos."})
     return await request_validation_exception_handler(request, exc)
 
