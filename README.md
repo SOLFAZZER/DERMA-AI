@@ -3,7 +3,7 @@
 Prototipo web académico (Universidad Santiago de Cali) que clasifica imágenes dermatoscópicas con una CNN (MobileNetV2) y explica la predicción con un mapa de calor Grad-CAM. **No es una herramienta de diagnóstico ni reemplaza a un profesional de la salud.**
 
 ## Estado
-Esqueleto inicial: API FastAPI con `GET /api/salud`. El resto se construye por pasos (ver `docs/BACKLOG.md`).
+API FastAPI con `GET /api/salud`, `GET /api/lesiones` y `GET /api/modelo` (catálogo de las 7 clases y versión del modelo en SQLite). El resto se construye por pasos (ver `docs/BACKLOG.md`).
 
 ## Cómo correrlo en tu computador
 Requiere Python 3.11 o superior.
@@ -17,6 +17,14 @@ uvicorn app.main:app --reload
 ```
 
 Abre http://127.0.0.1:8000/api/salud o la documentación interactiva en http://127.0.0.1:8000/docs.
+
+Datos iniciales (catálogo de las 7 clases y versión del modelo con sus métricas):
+
+```bash
+python -m scripts.inicializar_datos --metrics docs/modelo_v2/metrics.json --epocas 40
+```
+
+Crea `data/catalogo.db` (no se sube a Git). Se puede repetir sin duplicar datos.
 
 Pruebas y estilo:
 
