@@ -3,7 +3,7 @@
 Prototipo web académico (Universidad Santiago de Cali) que clasifica imágenes dermatoscópicas con una CNN (MobileNetV2) y explica la predicción con un mapa de calor Grad-CAM. **No es una herramienta de diagnóstico ni reemplaza a un profesional de la salud.**
 
 ## Estado
-API FastAPI con `GET /api/salud`, `GET /api/lesiones` y `GET /api/modelo` (catálogo de las 7 clases y versión del modelo en SQLite). El resto se construye por pasos (ver `docs/BACKLOG.md`).
+API FastAPI con `GET /api/salud`, `GET /api/lesiones` y `GET /api/modelo` (catálogo de las 7 clases y versión del modelo en SQLite) y el inicio de sesión con correo y contraseña (`/api/auth/registro`, `/login`, `/logout`, `/yo`). El resto se construye por pasos (ver `docs/BACKLOG.md`).
 
 ## Cómo correrlo en tu computador
 Requiere Python 3.11 o superior.
@@ -25,6 +25,8 @@ python -m scripts.inicializar_datos --metrics docs/modelo_v2/metrics.json --epoc
 ```
 
 Crea `data/catalogo.db` (no se sube a Git). Se puede repetir sin duplicar datos.
+
+Inicio de sesión: las cuentas se guardan en `data/usuarios.db` (no se sube a Git), con la contraseña en hash bcrypt y la sesión en una cookie firmada de 60 minutos. Para una cuenta de demostración que se crea al arrancar, define `DERMA_DEMO_EMAIL` y `DERMA_DEMO_PASSWORD` en `.env`. En producción (HTTPS) usa `DERMA_COOKIE_SECURE=true` y una `DERMA_SECRET_KEY` larga y aleatoria.
 
 Pruebas y estilo:
 

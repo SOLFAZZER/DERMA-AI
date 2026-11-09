@@ -3,8 +3,13 @@ import sqlite3
 from contextlib import asynccontextmanager
 from typing import Annotated
 
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi.exception_handlers import request_validation_exception_handler
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 
+from app.auth import seguridad, usuarios
+from app.auth.rutas import router as router_auth
 from app.config import settings
 from app.db import catalogo
 from app.deps import get_conn
@@ -14,13 +19,23 @@ Conexion = Annotated[sqlite3.Connection, Depends(get_conn)]
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Al arrancar se asegura que exista el esquema y el catálogo de las 7 clases.
+    # Catálogo de las 7 clases (C08)
     conn = catalogo.conectar(settings.catalog_db)
     try:
         catalogo.crear_esquema(conn)
         catalogo.cargar_catalogo(conn)
     finally:
         conn.close()
+    # Almacén de usuarios (C09) y usuario de demostración opcional
+    cu = catalogo.conectar(settings.users_db)
+    try:
+        usuarios.crear_esquema(cu)
+        if settings.demo_email and settings.demo_password:
+            correo = settings.demo_email.strip().lower()
+            if usuarios.buscar_por_correo(cu, correo) is None:
+                usuarios.crear_usuario(cu, correo, seguridad.hash_contrasena(settings.demo_password))
+    finally:
+        cu.close()
     yield
 
 
@@ -30,6 +45,15 @@ app = FastAPI(
     description="Prototipo académico de apoyo a la evaluación preliminar de lesiones cutáneas.",
     lifespan=lifespan,
 )
+app.include_router(router_auth)
+
+
+@app.exception_handler(RequestValidationError)
+async def datos_no_validos(request: Request, exc: RequestValidationError):
+    """En las rutas de autenticación, los datos mal formados responden 400 (como define la API)."""
+    if request.url.path.startswith("/api/auth"):
+        return JSONResponse(status_code=400, content={"detail": "Los datos enviados no son válidos."})
+    return await request_validation_exception_handler(request, exc)
 
 
 @app.get("/api/salud")
