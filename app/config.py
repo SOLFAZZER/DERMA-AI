@@ -19,6 +19,12 @@ class Settings:
     # En producción (HTTPS) poner DERMA_COOKIE_SECURE=true. En local (http) debe ir en false.
     cookie_secure: bool = _bool("DERMA_COOKIE_SECURE", False)
     bcrypt_rounds: int = int(os.environ.get("DERMA_BCRYPT_ROUNDS", "12"))
+    # Modelo: "keras" (el entrenado) o "provisional" (solo para desarrollo, sin TensorFlow).
+    modelo_modo: str = os.environ.get("DERMA_MODELO", "keras")
+    class_names_path: str = os.environ.get("DERMA_CLASS_NAMES", "models/class_names.json")
+    # Por debajo de esta confianza se avisa al usuario. Debe calibrarse con el conjunto de validación.
+    umbral_confianza: float = float(os.environ.get("DERMA_UMBRAL_CONFIANZA", "0.60"))
+    inferencia_timeout: float = float(os.environ.get("DERMA_INFERENCIA_TIMEOUT", "25"))
     # Usuario de demostración opcional: se crea al arrancar si no existe (riesgo A3).
     demo_email: str = os.environ.get("DERMA_DEMO_EMAIL", "")
     demo_password: str = os.environ.get("DERMA_DEMO_PASSWORD", "")

@@ -1,9 +1,7 @@
 """Punto de entrada de la API de Derma-AI (prototipo académico, no es una herramienta de diagnóstico)."""
-import sqlite3
 from contextlib import asynccontextmanager
-from typing import Annotated
 
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.exception_handlers import request_validation_exception_handler
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -12,11 +10,10 @@ from app.auth import seguridad, usuarios
 from app.auth.rutas import router as router_auth
 from app.config import settings
 from app.db import catalogo
-from app.deps import get_conn
+from app.deps import Conexion
 from app.imagenes.limite import LimiteCuerpo
 from app.imagenes.rutas import router as router_imagenes
-
-Conexion = Annotated[sqlite3.Connection, Depends(get_conn)]
+from app.inferencia import registro
 
 
 @asynccontextmanager
@@ -38,6 +35,7 @@ async def lifespan(app: FastAPI):
                 usuarios.crear_usuario(cu, correo, seguridad.hash_contrasena(settings.demo_password))
     finally:
         cu.close()
+    registro.precargar()  # carga el modelo una vez; si falla, la API sigue y /api/analizar responde 503
     yield
 
 
@@ -64,7 +62,7 @@ async def datos_no_validos(request: Request, exc: RequestValidationError):
 @app.get("/api/salud")
 def salud() -> dict:
     """I04. Estado del servicio."""
-    return {"estado": "listo", "version": settings.version, "modelo_cargado": False}
+    return {"estado": "listo", "version": settings.version, "modelo_cargado": registro.esta_cargado()}
 
 
 @app.get("/api/lesiones")

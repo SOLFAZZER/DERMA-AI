@@ -28,6 +28,8 @@ Crea `data/catalogo.db` (no se sube a Git). Se puede repetir sin duplicar datos.
 
 Inicio de sesión: las cuentas se guardan en `data/usuarios.db` (no se sube a Git), con la contraseña en hash bcrypt y la sesión en una cookie firmada de 60 minutos. Para una cuenta de demostración que se crea al arrancar, define `DERMA_DEMO_EMAIL` y `DERMA_DEMO_PASSWORD` en `.env`. En producción (HTTPS) usa `DERMA_COOKIE_SECURE=true` y una `DERMA_SECRET_KEY` larga y aleatoria.
 
+Modelo de clasificación: copia `dermaai_mobilenetv2_v1.keras` y `class_names.json` a `models/`. TensorFlow solo funciona con **Python 3.10 a 3.13** (no con 3.14): crea el entorno con `py -3.12 -m venv .venv` e instala `pip install -r requirements-ml.txt`. Para desarrollar sin TensorFlow, define `DERMA_MODELO=provisional` en `.env` (modelo falso, solo para pruebas; la respuesta lo avisa).
+
 Pruebas y estilo:
 
 ```bash
