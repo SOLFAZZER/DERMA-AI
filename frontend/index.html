@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Derma-AI · Prototipo académico</title>
+  <link rel="icon" type="image/png" href="img/logo.png">
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+<div class="app">
+  <header class="barra">
+    <div class="marca">
+      <img class="logo" src="img/logo.png" alt="Logo de Derma-AI">
+      <span class="nombre">Derma-AI</span>
+      <span class="etiqueta">PROTOTIPO ACADÉMICO</span>
+    </div>
+    <div class="barra-derecha">
+      <div id="pasos" class="pasos" hidden>
+        <span id="pasos-texto">Paso 1 de 4</span>
+        <span class="pasos-barras" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      </div>
+      <div id="sesion" class="sesion" hidden>
+        <span id="sesion-correo"></span>
+        <button type="button" id="btn-salir" class="btn-texto">Cerrar sesión</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="contenido">
+    <!-- Acceso -->
+    <section id="pantalla-acceso" class="pantalla" hidden>
+      <h1 tabindex="-1">Ingresa a Derma-AI</h1>
+      <p class="sub">Inicia sesión o crea una cuenta con tu correo para usar el análisis.</p>
+      <div class="pestanas" role="tablist" aria-label="Acceso">
+        <button type="button" role="tab" id="tab-login" aria-selected="true">Iniciar sesión</button>
+        <button type="button" role="tab" id="tab-registro" aria-selected="false">Crear cuenta</button>
+      </div>
+      <form id="form-acceso" class="formulario" novalidate>
+        <label for="correo">Correo electrónico</label>
+        <input id="correo" name="correo" type="email" autocomplete="email" maxlength="254" required>
+        <label for="contrasena">Contraseña</label>
+        <input id="contrasena" name="contrasena" type="password" autocomplete="current-password" maxlength="72" required>
+        <p id="ayuda-contrasena" class="ayuda" hidden>Mínimo 8 caracteres.</p>
+        <div id="bloque-aviso" hidden>
+          <label class="casilla">
+            <input id="acepta-aviso" type="checkbox">
+            <span>Acepto el tratamiento de mis datos personales para iniciar sesión (Ley 1581 de 2012).</span>
+          </label>
+          <details class="detalle">
+            <summary>Ver aviso de tratamiento de datos</summary>
+            <p>Derma-AI guarda únicamente tu correo y una versión protegida de tu contraseña, solo para permitirte iniciar sesión. No guarda tus imágenes ni los resultados, y no los asocia a tu cuenta. Para consultar o eliminar tus datos, comunícate con el equipo del proyecto.</p>
+          </details>
+        </div>
+        <p id="error-acceso" class="mensaje-error" role="alert" hidden></p>
+        <button type="submit" id="btn-acceso" class="btn btn-primario">Iniciar sesión</button>
+      </form>
+    </section>
+
+    <!-- Paso 1: inicio -->
+    <section id="pantalla-inicio" class="pantalla" hidden>
+      <h1 tabindex="-1">Analiza una imagen de una lesión de la piel</h1>
+      <p class="sub">Sube una foto dermatoscópica y Derma-AI te muestra a qué tipo de lesión se parece, con qué confianza y qué zonas de la imagen tuvo en cuenta.</p>
+      <div class="aviso" role="note">
+        <span class="aviso-icono" aria-hidden="true">⚠</span>
+        <p><strong>Prototipo académico.</strong> Derma-AI no reemplaza la valoración de un profesional de la salud. Si una lesión cambia, sangra o te preocupa, consulta a un dermatólogo.</p>
+      </div>
+      <div class="acciones"><button type="button" id="btn-comenzar" class="btn btn-primario">Comenzar</button></div>
+    </section>
+
+    <!-- Paso 2: carga -->
+    <section id="pantalla-carga" class="pantalla" hidden>
+      <h1 tabindex="-1">Carga tu imagen</h1>
+      <p class="sub">Usa una imagen dermatoscópica nítida y centrada en la lesión.</p>
+      <div id="zona" class="zona">
+        <div class="icono-subir" aria-hidden="true">↑</div>
+        <p class="zona-titulo">Arrastra la imagen aquí</p>
+        <p class="zona-detalle">JPG, JPEG o PNG · Máximo 5 MB</p>
+        <button type="button" id="btn-elegir" class="btn btn-primario">Seleccionar archivo</button>
+        <input id="archivo" type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png" hidden>
+      </div>
+      <p id="error-carga" class="mensaje-error" role="alert" hidden></p>
+    </section>
+
+    <!-- Paso 2: vista previa -->
+    <section id="pantalla-previa" class="pantalla" hidden>
+      <h1 tabindex="-1">Revisa tu imagen</h1>
+      <div class="previa">
+        <img id="previa-img" alt="Vista previa de la imagen elegida">
+        <dl class="datos">
+          <dt>Nombre</dt><dd id="d-nombre"></dd>
+          <dt>Formato</dt><dd id="d-formato"></dd>
+          <dt>Tamaño</dt><dd id="d-tamano"></dd>
+          <dt>Dimensiones</dt><dd id="d-dim"></dd>
+        </dl>
+      </div>
+      <p class="mensaje-ok" role="status">✔ La imagen cumple los requisitos.</p>
+      <div class="acciones">
+        <button type="button" id="btn-analizar" class="btn btn-primario">Analizar imagen</button>
+        <button type="button" id="btn-cambiar" class="btn btn-secundario">Cambiar imagen</button>
+      </div>
+    </section>
+
+    <!-- Paso 2: análisis en curso -->
+    <section id="pantalla-analisis" class="pantalla" hidden>
+      <h1 tabindex="-1">Analizando tu imagen…</h1>
+      <p class="sub">Esto toma menos de 30 segundos.</p>
+      <div id="progreso" class="progreso" role="progressbar" aria-label="Progreso del análisis" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <div id="progreso-barra"></div>
+      </div>
+      <p id="progreso-texto" class="nota" aria-live="polite">Analizando la imagen…</p>
+    </section>
+
+    <!-- Paso 3: resultado -->
+    <section id="pantalla-resultado" class="pantalla" hidden>
+      <h1 tabindex="-1">Resultado</h1>
+      <div class="tarjeta">
+        <p class="etiqueta-pequena">La imagen se parece más a</p>
+        <h2 id="res-nombre"></h2>
+        <span id="res-riesgo" class="chip"></span>
+        <p id="res-descripcion" class="descripcion"></p>
+        <div class="confianza">
+          <div class="confianza-linea"><span>Confianza del modelo</span><strong id="res-confianza"></strong></div>
+          <div class="barra-confianza" aria-hidden="true"><div id="res-confianza-barra"></div></div>
+        </div>
+        <p id="res-baja" class="mensaje-aviso" role="status" hidden>La confianza del resultado es baja: tómalo con precaución y consulta a un profesional.</p>
+      </div>
+      <h3>Otras posibilidades</h3>
+      <ul id="res-otras" class="otras"></ul>
+      <p id="res-mensaje" class="nota" hidden></p>
+      <div class="aviso" role="note">
+        <span class="aviso-icono" aria-hidden="true">⚠</span>
+        <p id="res-aviso"></p>
+      </div>
+      <div class="acciones">
+        <button type="button" id="btn-explicacion" class="btn btn-primario">Ver explicación del resultado</button>
+        <button type="button" id="btn-nueva" class="btn btn-secundario">Cargar nueva imagen</button>
+      </div>
+    </section>
+
+    <!-- Paso 4: explicación -->
+    <section id="pantalla-explicacion" class="pantalla" hidden>
+      <h1 tabindex="-1">Explicación del resultado</h1>
+      <p class="sub">Aquí se compara tu imagen con un mapa de calor que muestra las zonas en las que más se fijó el modelo.</p>
+      <div id="exp-comparar" class="comparar">
+        <figure><img id="exp-original" alt="Imagen original"><figcaption>Imagen original</figcaption></figure>
+        <figure><img id="exp-mapa" alt="Imagen con el mapa de calor superpuesto"><figcaption>Zonas en las que se fijó el modelo</figcaption></figure>
+      </div>
+      <div id="exp-leyenda" class="leyenda" aria-hidden="true"><span>Poca influencia</span><i></i><span>Mucha influencia</span></div>
+      <p id="exp-texto" class="nota">Los colores rojo y amarillo señalan las zonas que más influyeron en el resultado, y el azul las que casi no influyeron.</p>
+      <p id="exp-sin-mapa" class="mensaje-aviso" hidden>No se pudo mostrar el mapa de calor, pero el resultado sigue disponible.</p>
+      <p class="nota"><strong>Este mapa no confirma ni descarta ninguna enfermedad.</strong></p>
+      <div class="acciones">
+        <button type="button" id="btn-volver" class="btn btn-secundario">Volver al resultado</button>
+        <button type="button" id="btn-nueva2" class="btn btn-primario">Cargar nueva imagen</button>
+      </div>
+    </section>
+
+    <!-- Error -->
+    <section id="pantalla-error" class="pantalla" hidden>
+      <h1 id="error-titulo" tabindex="-1">No pudimos usar la imagen</h1>
+      <p id="error-texto" class="sub" role="alert"></p>
+      <div class="acciones">
+        <button type="button" id="btn-reintentar" class="btn btn-primario" hidden>Intentar de nuevo</button>
+        <button type="button" id="btn-error-nueva" class="btn btn-secundario">Cargar nueva imagen</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="pie">
+    <span>Universidad Santiago de Cali · Proyecto GPT01</span>
+    <span>Tu imagen no se guarda</span>
+    <span>Conexión segura HTTPS</span>
+  </footer>
+</div>
+<script src="js/app.js" defer></script>
+</body>
+</html>

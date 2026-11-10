@@ -1,0 +1,7 @@
+{
+  "name": "derma-ai-pruebas-interfaz",
+  "private": true,
+  "description": "Pruebas de la interfaz web (simulador de navegador jsdom). Uso: npm install && npm test",
+  "scripts": { "test": "node flujo.test.js" },
+  "devDependencies": { "jsdom": "^31.0.0" }
+}

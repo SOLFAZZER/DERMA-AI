@@ -1,13 +1,17 @@
 """Punto de entrada de la API de Derma-AI (prototipo académico, no es una herramienta de diagnóstico)."""
+import mimetypes
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exception_handlers import request_validation_exception_handler
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from app.auth import seguridad, usuarios
 from app.auth.rutas import router as router_auth
+from app.cabeceras import CabecerasSeguridad
 from app.config import settings
 from app.db import catalogo
 from app.deps import Conexion
@@ -50,6 +54,8 @@ app.include_router(router_imagenes)
 # 5 MB de imagen + un margen para los encabezados del formulario multipart
 app.add_middleware(LimiteCuerpo, ruta="/api/analizar", max_bytes=settings.max_upload_mb * 1024 * 1024 + 64 * 1024)
 
+app.add_middleware(CabecerasSeguridad)
+
 
 @app.exception_handler(RequestValidationError)
 async def datos_no_validos(request: Request, exc: RequestValidationError):
@@ -78,3 +84,15 @@ def modelo(conn: Conexion) -> dict:
     if version is None:
         raise HTTPException(status_code=404, detail="Aún no hay una versión del modelo registrada.")
     return version
+
+
+# La interfaz web se sirve desde la raíz. Debe ir al final para no tapar las rutas de la API.
+# En algunos Windows el registro del sistema asigna tipos erróneos (p. ej. .js como text/plain) y,
+# con la cabecera nosniff, el navegador bloquearía el script. Se fijan explícitamente.
+for extension, tipo in ((".js", "text/javascript"), (".css", "text/css"), (".html", "text/html"),
+                        (".png", "image/png")):
+    mimetypes.add_type(tipo, extension)
+
+FRONTEND = Path(__file__).resolve().parent.parent / "frontend"
+if FRONTEND.is_dir():
+    app.mount("/", StaticFiles(directory=FRONTEND, html=True), name="frontend")

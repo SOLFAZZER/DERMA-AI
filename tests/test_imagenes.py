@@ -77,3 +77,10 @@ def test_preprocesar_escala_de_grises_queda_en_3_canales():
 def test_preprocesar_transparencia_queda_en_blanco():
     x = preprocesar(validar("a.png", imagen_bytes("PNG", modo="RGBA", color=(0, 0, 0, 0))))
     assert np.allclose(x, 1.0)
+
+
+def test_imagen_demasiado_pequena_da_422():
+    with pytest.raises(ErrorImagen) as e:
+        validar("a.png", imagen_bytes("PNG", tamano=(99, 400)))
+    assert e.value.codigo == 422 and "demasiado pequeña" in e.value.mensaje
+    assert validar("a.png", imagen_bytes("PNG", tamano=(100, 100))).size == (100, 100)

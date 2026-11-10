@@ -13,6 +13,7 @@ from PIL import Image, UnidentifiedImageError
 EXTENSIONES = {".jpg", ".jpeg", ".png"}
 FORMATOS = {"JPEG", "PNG"}
 TROZO = 64 * 1024
+MIN_LADO = 100  # píxeles: por debajo de esto la imagen no sirve para el análisis
 
 # Protección contra imágenes con un número absurdo de píxeles (Pillow falla a partir del doble).
 Image.MAX_IMAGE_PIXELS = 40_000_000
@@ -43,7 +44,7 @@ def validar(nombre: str | None, contenido: bytes) -> Image.Image:
     """Comprueba extensión, contenido y legibilidad. Devuelve la imagen ya decodificada.
 
     400: la extensión o el contenido no corresponden a JPG/PNG.
-    422: el archivo parece JPG/PNG pero está vacío, dañado o no se puede leer.
+    422: el archivo parece JPG/PNG pero está vacío, dañado, no se puede leer o es demasiado pequeño.
     """
     if Path(nombre or "").suffix.lower() not in EXTENSIONES:
         raise ErrorImagen(400, "Formato no permitido. Usa una imagen JPG, JPEG o PNG.")
@@ -61,4 +62,6 @@ def validar(nombre: str | None, contenido: bytes) -> Image.Image:
         imagen.load()  # decodifica todo: detecta archivos truncados o dañados
     except (OSError, SyntaxError, ValueError, Image.DecompressionBombError):
         raise ErrorImagen(422, "La imagen está dañada o no se pudo leer.") from None
+    if min(imagen.size) < MIN_LADO:
+        raise ErrorImagen(422, f"La imagen es demasiado pequeña (mínimo {MIN_LADO} × {MIN_LADO} píxeles).")
     return imagen
