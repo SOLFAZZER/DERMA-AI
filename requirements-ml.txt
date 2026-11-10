@@ -1,3 +1,2 @@
 # Inferencia y Grad-CAM. TensorFlow solo tiene versiones para Python 3.10 a 3.13 (no 3.14).
 tensorflow>=2.19,<3
-opencv-python-headless>=4.9

@@ -45,4 +45,4 @@ async def analizar(usuario: UsuarioActual, conn: Conexion, imagen: Annotated[Upl
     except Exception:
         log.exception("Error al analizar la imagen")
         raise HTTPException(500, "Ocurrió un error al analizar la imagen.") from None
-    return armar_respuesta(resultado, conn)
+    return armar_respuesta(resultado, conn, entrada)

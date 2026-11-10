@@ -1,3 +1,4 @@
+import base64
 import io
 
 import numpy as np
@@ -85,11 +86,11 @@ def test_imagen_valida_devuelve_el_resultado(client_completo):
     assert r.status_code == 200
     cuerpo = r.json()
     assert set(cuerpo) == {"categoria", "confianza", "baja_confianza", "probabilidades",
-                           "mapa_calor", "mensaje", "version_modelo", "aviso"}
+                           "mapa_calor", "explicacion_mapa", "mensaje", "version_modelo", "aviso"}
     cat = cuerpo["categoria"]
     assert cat["codigo"] in {"AKIEC", "BCC", "BKL", "DF", "MEL", "NV", "VASC"}
     assert cat["nombre"] and cat["descripcion"] and cat["nivel_riesgo"]
-    assert cuerpo["aviso"] and cuerpo["mapa_calor"] == ""
+    assert cuerpo["aviso"]
 
 
 def test_las_probabilidades_suman_100_y_van_de_mayor_a_menor(client_completo):
@@ -135,3 +136,34 @@ def test_error_inesperado_da_500(client_completo, monkeypatch):
 
     monkeypatch.setattr(registro, "_servicio", ServicioInferencia(Roto(np.zeros(7))))
     assert subir(con_sesion(client_completo), "a.jpg", jpeg()).status_code == 500
+
+
+# ---------------------------------------------------------------- mapa de calor (Grad-CAM)
+
+def test_la_respuesta_incluye_el_mapa_de_calor_como_png(client_completo):
+    cuerpo = subir(con_sesion(client_completo), "a.jpg", jpeg((640, 480))).json()
+    png = Image.open(io.BytesIO(base64.b64decode(cuerpo["mapa_calor"])))
+    assert png.format == "PNG" and png.size == (224, 224) and png.mode == "RGB"
+    assert "ayuda visual" in cuerpo["explicacion_mapa"]
+
+
+def test_si_falla_el_mapa_igual_se_entrega_la_categoria(client_completo, monkeypatch):
+    class SinMapa(ModeloFalso):
+        def mapa_calor(self, tensor, indice):
+            raise RuntimeError("falla Grad-CAM")
+
+    modelo = SinMapa([0.01, 0.01, 0.01, 0.01, 0.02, 0.93, 0.01])
+    monkeypatch.setattr(registro, "_servicio", ServicioInferencia(modelo, umbral=0.6))
+    r = subir(con_sesion(client_completo), "a.jpg", jpeg())
+    assert r.status_code == 200
+    cuerpo = r.json()
+    assert cuerpo["mapa_calor"] == "" and cuerpo["explicacion_mapa"] == ""
+    assert "No se pudo generar el mapa de calor" in cuerpo["mensaje"]
+    assert cuerpo["categoria"]["codigo"] == "NV" and cuerpo["confianza"] == 93.0
+
+
+def test_modelo_sin_mapa_lo_dice(client_completo, monkeypatch):
+    modelo = ModeloFalso([0.01, 0.01, 0.01, 0.01, 0.02, 0.93, 0.01])
+    monkeypatch.setattr(registro, "_servicio", ServicioInferencia(modelo, umbral=0.6))
+    cuerpo = subir(con_sesion(client_completo), "a.jpg", jpeg()).json()
+    assert cuerpo["mapa_calor"] == "" and "no ofrece mapa de calor" in cuerpo["mensaje"]
