@@ -15,6 +15,8 @@ from app.cabeceras import CabecerasSeguridad
 from app.config import settings
 from app.db import catalogo
 from app.deps import Conexion
+from app.exportacion.rutas import MAX_RESULTADO
+from app.exportacion.rutas import router as router_exportacion
 from app.imagenes.limite import LimiteCuerpo
 from app.imagenes.rutas import router as router_imagenes
 from app.inferencia import registro
@@ -51,8 +53,12 @@ app = FastAPI(
 )
 app.include_router(router_auth)
 app.include_router(router_imagenes)
+app.include_router(router_exportacion)
 # 5 MB de imagen + un margen para los encabezados del formulario multipart
 app.add_middleware(LimiteCuerpo, ruta="/api/analizar", max_bytes=settings.max_upload_mb * 1024 * 1024 + 64 * 1024)
+
+app.add_middleware(LimiteCuerpo, ruta="/api/exportar-pdf",
+                   max_bytes=settings.max_upload_mb * 1024 * 1024 + MAX_RESULTADO + 64 * 1024)
 
 app.add_middleware(CabecerasSeguridad)
 
@@ -60,7 +66,7 @@ app.add_middleware(CabecerasSeguridad)
 @app.exception_handler(RequestValidationError)
 async def datos_no_validos(request: Request, exc: RequestValidationError):
     """En autenticación y análisis, los datos mal formados responden 400 (como define la API)."""
-    if request.url.path.startswith(("/api/auth", "/api/analizar")):
+    if request.url.path.startswith(("/api/auth", "/api/analizar", "/api/exportar-pdf")):
         return JSONResponse(status_code=400, content={"detail": "Los datos enviados no son válidos."})
     return await request_validation_exception_handler(request, exc)
 

@@ -275,6 +275,7 @@
     texto("res-mensaje", provisional ? provisional[0] : "");
     mostrarEl($("res-mensaje"), !!provisional);
     texto("res-aviso", r.aviso || "Prototipo académico: este resultado no es un diagnóstico médico.");
+    errorPdf("");
     mostrar("resultado");
   }
   function mostrarExplicacion() {
@@ -290,6 +291,41 @@
     }
     mostrarEl($("exp-texto"), hayMapa);
     mostrar("explicacion");
+  }
+
+  /* ------------------------------------------------------------ descarga del resultado en PDF */
+  function errorPdf(mensaje) {
+    texto("error-pdf", mensaje);
+    mostrarEl($("error-pdf"), !!mensaje);
+  }
+  function descargarPdf() {
+    if (!estado.resultado) { return; }
+    errorPdf("");
+    var botones = [$("btn-pdf"), $("btn-pdf2")];
+    botones.forEach(function (b) { b.disabled = true; });
+    var datos = new FormData();
+    datos.append("resultado", JSON.stringify(estado.resultado));
+    datos.append("fecha", new Date().toLocaleString("es-CO"));
+    if (estado.archivo) { datos.append("imagen", estado.archivo, estado.archivo.name); }
+    fetch("/api/exportar-pdf", { method: "POST", body: datos }).then(function (resp) {
+      if (resp.status === 401) { return mostrarAcceso("Tu sesión venció. Inicia sesión de nuevo."); }
+      if (!resp.ok) { throw new Error("pdf"); }
+      return resp.blob().then(function (blob) {
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url;
+        a.download = "derma-ai-resultado.pdf";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+      });
+    }).catch(function () {
+      mostrar("resultado");
+      errorPdf("No se pudo generar el PDF. Intenta de nuevo.");
+    }).then(function () {
+      botones.forEach(function (b) { b.disabled = false; });
+    });
   }
 
   /* ------------------------------------------------------------ eventos */
@@ -315,6 +351,8 @@
     $("btn-analizar").addEventListener("click", analizar);
     $("btn-explicacion").addEventListener("click", mostrarExplicacion);
     $("btn-volver").addEventListener("click", mostrarResultado);
+    $("btn-pdf").addEventListener("click", descargarPdf);
+    $("btn-pdf2").addEventListener("click", descargarPdf);
     $("btn-nueva").addEventListener("click", nuevaImagen);
     $("btn-nueva2").addEventListener("click", nuevaImagen);
     $("btn-error-nueva").addEventListener("click", nuevaImagen);

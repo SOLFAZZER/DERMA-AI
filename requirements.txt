@@ -5,3 +5,4 @@ pillow>=10.0
 numpy>=1.26
 bcrypt>=4.1
 pyjwt>=2.8
+reportlab>=4.0

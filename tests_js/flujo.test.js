@@ -291,5 +291,29 @@ async function prueba(nombre, f) { try { await f(); pruebas++; console.log("  ok
     assert.deepStrictEqual(a.pantallaVisible(), ["resultado"]);
   });
 
+  await prueba("descargar PDF: envía el resultado y la imagen, y baja el archivo", async () => {
+    const a = await nuevaApp({ ...con_sesion, "/api/analizar": respuesta(200, RESULTADO()),
+      "/api/exportar-pdf": { ok: true, status: 200, headers: { get: () => "application/pdf" }, blob: async () => ({}) } });
+    a.click("btn-comenzar"); await a.elegir(a.archivo("l.png")); a.click("btn-analizar"); await a.esperar(400);
+    let bajado = null;
+    a.w.HTMLAnchorElement.prototype.click = function () { bajado = this.download; };
+    a.click("btn-pdf"); await a.esperar(100);
+    const l = a.llamadas.find((x) => x.ruta === "/api/exportar-pdf");
+    assert.ok(l, "no llamó a la API");
+    assert.strictEqual(JSON.parse(l.op.body.get("resultado")).categoria.codigo, "NV");
+    assert.ok(l.op.body.get("imagen") && l.op.body.get("fecha"));
+    assert.strictEqual(bajado, "derma-ai-resultado.pdf");
+    assert.strictEqual(a.$("btn-pdf").disabled, false);
+  });
+
+  await prueba("descargar PDF: si falla muestra un error y deja reintentar", async () => {
+    const a = await nuevaApp({ ...con_sesion, "/api/analizar": respuesta(200, RESULTADO()), "/api/exportar-pdf": respuesta(500, {}) });
+    a.click("btn-comenzar"); await a.elegir(a.archivo("l.png")); a.click("btn-analizar"); await a.esperar(400);
+    a.click("btn-pdf"); await a.esperar(100);
+    assert.ok(a.visible("error-pdf"));
+    assert.match(a.$("error-pdf").textContent, /No se pudo generar el PDF/);
+    assert.strictEqual(a.$("btn-pdf").disabled, false);
+  });
+
   console.log(`\n${pruebas} pruebas de la interfaz pasaron` + (process.exitCode ? " (hay fallas)" : ""));
 })();
