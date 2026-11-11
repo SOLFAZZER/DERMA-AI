@@ -25,3 +25,9 @@ Prioridad según la matriz de trazabilidad y el SRS. IDs entre paréntesis = req
 
 ## Could have (si sobra tiempo)
 - Alternar imagen original y mapa de calor (5.4), nueva consulta (7.7), descripción de clases (7.8).
+
+## Cambio por documentar: exportar resultado en PDF (paso 8)
+- Nuevo requisito: el usuario puede descargar el resultado en PDF (categoría, confianza, probabilidades de las 7 clases, imagen original y mapa Grad-CAM).
+- Nueva interfaz I14: POST /api/exportar-pdf (requiere sesión; 400 datos inválidos, 401 sin sesión, 413 demasiado grande, 500 error).
+- El PDF se arma en memoria y no se guarda nada (se mantiene SRS 9.1). Sin historial (SC-01).
+- Nueva dependencia: reportlab.

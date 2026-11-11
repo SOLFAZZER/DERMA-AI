@@ -30,3 +30,6 @@ models/*
 .vscode/
 .idea/
 .DS_Store
+
+# Node
+node_modules/
