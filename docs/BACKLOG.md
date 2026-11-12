@@ -31,3 +31,7 @@ Prioridad según la matriz de trazabilidad y el SRS. IDs entre paréntesis = req
 - Nueva interfaz I14: POST /api/exportar-pdf (requiere sesión; 400 datos inválidos, 401 sin sesión, 413 demasiado grande, 500 error).
 - El PDF se arma en memoria y no se guarda nada (se mantiene SRS 9.1). Sin historial (SC-01).
 - Nueva dependencia: reportlab.
+
+## Cambio por documentar: preprocesamiento igual al del entrenamiento (paso 9)
+- C04 (preprocesamiento): el redimensionado a 224×224 ahora copia el de TensorFlow (`tf.image.resize` bilineal sin suavizado + redondeo a entero), porque el de Pillow suavizaba al reducir y daba píxeles algo distintos a los del entrenamiento (diferencia media ~0,5 % y hasta 1,0 en la escala de -1 a 1). No cambia la entrada del modelo: 224×224 RGB en [-1, 1].
+- Verificación: `python -m scripts.verificar_preproceso --carpeta ... --csv split_test.csv` compara servidor contra entrenamiento y mide el acierto (referencia: 79,9 %).
