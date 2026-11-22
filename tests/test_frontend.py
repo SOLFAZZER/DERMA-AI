@@ -43,3 +43,8 @@ def test_el_html_no_usa_scripts_ni_estilos_en_linea():
 def test_los_tipos_de_archivo_son_correctos_aunque_el_sistema_los_registre_mal():
     assert client.get("/js/app.js").headers["content-type"].startswith("text/javascript")
     assert client.get("/css/estilos.css").headers["content-type"].startswith("text/css")
+
+
+def test_la_pantalla_de_carga_pide_subir_solo_lesiones_cutaneas():
+    texto = client.get("/").text
+    assert 'id="aviso-carga"' in texto and "posible lesión cutánea" in texto

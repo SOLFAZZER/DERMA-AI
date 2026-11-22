@@ -1,0 +1,71 @@
+{
+  "fecha": "2026-11-22",
+  "conjunto": "HAM10000, particion de prueba agrupada por lesion_id, con promedio de 4 vistas (TTA)",
+  "n_prueba": 1441,
+  "exactitud": 0.8099,
+  "precision_macro": 0.6849,
+  "sensibilidad_macro": 0.6771,
+  "f1_macro": 0.6746,
+  "precision_ponderada": 0.8297,
+  "sensibilidad_ponderada": 0.8099,
+  "f1_ponderada": 0.817,
+  "por_clase": {
+    "AKIEC": {
+      "precision": 0.413,
+      "recall": 0.559,
+      "f1-score": 0.475,
+      "support": 34
+    },
+    "BCC": {
+      "precision": 0.851,
+      "recall": 0.708,
+      "f1-score": 0.773,
+      "support": 89
+    },
+    "BKL": {
+      "precision": 0.711,
+      "recall": 0.601,
+      "f1-score": 0.652,
+      "support": 168
+    },
+    "DF": {
+      "precision": 0.571,
+      "recall": 0.444,
+      "f1-score": 0.5,
+      "support": 9
+    },
+    "MEL": {
+      "precision": 0.412,
+      "recall": 0.575,
+      "f1-score": 0.48,
+      "support": 146
+    },
+    "NV": {
+      "precision": 0.926,
+      "recall": 0.899,
+      "f1-score": 0.912,
+      "support": 974
+    },
+    "VASC": {
+      "precision": 0.909,
+      "recall": 0.952,
+      "f1-score": 0.93,
+      "support": 21
+    }
+  },
+  "hiperparametros": {
+    "fase1": {
+      "epocas_max": 10,
+      "lr": 0.001
+    },
+    "fase2": {
+      "epocas_max": 30,
+      "lr": 0.0001,
+      "capas_descongeladas": 100
+    },
+    "potencia_pesos": 0.75,
+    "batch": 32,
+    "semilla": 42,
+    "tta": true
+  }
+}

@@ -25,6 +25,16 @@ def test_carga_y_predice(ruta_modelo):
     assert p.shape == (7,) and p.sum() == pytest.approx(1.0, abs=1e-4)
 
 
+def test_tta_promedia_cuatro_vistas(ruta_modelo):
+    x = np.random.default_rng(5).uniform(-1, 1, size=(1, 224, 224, 3)).astype(np.float32)
+    sin = ModeloKeras(ruta_modelo, CLASES_MODELO, tta=False)
+    con = ModeloKeras(ruta_modelo, CLASES_MODELO, tta=True)
+    vistas = [x, x[:, :, ::-1, :], x[:, ::-1, :, :], x[:, ::-1, ::-1, :]]
+    esperado = np.mean([sin.predecir(np.ascontiguousarray(v)) for v in vistas], axis=0)
+    assert con.predecir(x) == pytest.approx(esperado, abs=1e-5)
+    assert con.predecir(x).sum() == pytest.approx(1.0, abs=1e-4)
+
+
 def test_numero_de_clases_distinto_da_error(ruta_modelo):
     with pytest.raises(InferenciaNoDisponible):
         ModeloKeras(ruta_modelo, CLASES_MODELO[:5])

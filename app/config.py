@@ -15,7 +15,7 @@ class Settings:
     max_upload_mb: int = int(os.environ.get("DERMA_MAX_UPLOAD_MB", "5"))
     users_db: str = os.environ.get("DERMA_USERS_DB", "data/usuarios.db")
     catalog_db: str = os.environ.get("DERMA_CATALOG_DB", "data/catalogo.db")
-    model_path: str = os.environ.get("DERMA_MODEL_PATH", "models/dermaai_mobilenetv2_v1.keras")
+    model_path: str = os.environ.get("DERMA_MODEL_PATH", "models/dermaai_mobilenetv2_v2b.keras")
     # En producción (HTTPS) poner DERMA_COOKIE_SECURE=true. En local (http) debe ir en false.
     cookie_secure: bool = _bool("DERMA_COOKIE_SECURE", False)
     bcrypt_rounds: int = int(os.environ.get("DERMA_BCRYPT_ROUNDS", "12"))
@@ -24,6 +24,8 @@ class Settings:
     class_names_path: str = os.environ.get("DERMA_CLASS_NAMES", "models/class_names.json")
     # Por debajo de esta confianza se avisa al usuario. Debe calibrarse con el conjunto de validación.
     umbral_confianza: float = float(os.environ.get("DERMA_UMBRAL_CONFIANZA", "0.60"))
+    # Promedia 4 vistas de la imagen (normal, espejo horizontal, espejo vertical y ambos). Con la v2b sube la exactitud.
+    tta: bool = _bool("DERMA_TTA", True)
     inferencia_timeout: float = float(os.environ.get("DERMA_INFERENCIA_TIMEOUT", "25"))
     # Usuario de demostración opcional: se crea al arrancar si no existe (riesgo A3).
     demo_email: str = os.environ.get("DERMA_DEMO_EMAIL", "")

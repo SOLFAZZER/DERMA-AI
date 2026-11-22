@@ -4,6 +4,7 @@ from pathlib import Path
 
 import numpy as np
 
+from app.config import settings
 from app.inferencia.base import InferenciaNoDisponible
 
 log = logging.getLogger("derma.keras")
@@ -12,7 +13,8 @@ log = logging.getLogger("derma.keras")
 class ModeloKeras:
     provisional = False
 
-    def __init__(self, ruta: str, clases: list[str]):
+    def __init__(self, ruta: str, clases: list[str], tta: bool | None = None):
+        self.tta = settings.tta if tta is None else tta
         if not Path(ruta).is_file():
             raise InferenciaNoDisponible(f"No se encontró el modelo en {ruta}.")
         try:
@@ -38,7 +40,12 @@ class ModeloKeras:
                 self._gradcam_listo = False
 
     def predecir(self, tensor: np.ndarray) -> np.ndarray:
-        return np.asarray(self._modelo(tensor, training=False))[0]
+        """Probabilidades de las clases. Con `tta` se promedian 4 vistas de la misma imagen
+        (normal, espejo horizontal, espejo vertical y ambos), en una sola pasada por lotes."""
+        if not self.tta:
+            return np.asarray(self._modelo(tensor, training=False))[0]
+        lote = np.concatenate([tensor, tensor[:, :, ::-1, :], tensor[:, ::-1, :, :], tensor[:, ::-1, ::-1, :]])
+        return np.asarray(self._modelo(lote, training=False)).mean(axis=0)
 
     # ------------------------------------------------------------------ Grad-CAM (C06)
 
